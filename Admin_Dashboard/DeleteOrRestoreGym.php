@@ -17,7 +17,7 @@ if ($stmt->execute()) {
         </script>";
 
         echo "<script language='JavaScript'>
-        document.location='./Gyms.php';
+        document.location='./Accpeted_Gyms.php';
         </script>";
 
     } else {
@@ -26,7 +26,7 @@ alert ('Gym Has Been Restored Successfully !');
 </script>";
 
         echo "<script language='JavaScript'>
-document.location='./Gyms.php';
+document.location='./Accpeted_Gyms.php';
 </script>";
     }
 

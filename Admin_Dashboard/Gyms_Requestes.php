@@ -29,7 +29,7 @@ if (!$A_ID) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Gyms - Gym Hub</title>
+    <title>Gyms Requestes - Gym Hub</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
@@ -149,14 +149,16 @@ if (!$A_ID) {
                       <th scope="col">Email</th>
                       <th scope="col">Phone</th>
                       <th scope="col">City</th>
+                      <th scope="col">Contract Type</th>
+                      <th scope="col">Duration</th>
                       <th scope="col">Status</th>
-                      <th scope="col">Created At</th>
+                      <!-- <th scope="col">Created At</th> -->
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                   <?php
-$sql1 = mysqli_query($con, "SELECT * from gyms ORDER BY id DESC");
+$sql1 = mysqli_query($con, "SELECT * from gyms WHERE status = 'PENDING' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 
@@ -176,6 +178,13 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
     $manager_name = $row2['name'];
 
+    $sql3 = mysqli_query($con, "SELECT * from gyms_contracts WHERE gym_id = '$gym_id'");
+    $row3 = mysqli_fetch_array($sql3);
+
+    $contract_type = $row3['contract_type'];
+    $start_date = $row3['start_date'];
+    $end_date = $row3['end_date'];
+
     ?>
                     <tr>
                       <th scope="row"><?php echo $gym_id ?></th>
@@ -185,8 +194,10 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                       <td><?php echo $gym_email ?></td>
                       <td><?php echo $gym_phone ?></td>
                       <td><?php echo $gym_city ?></td>
+                      <td><?php echo $contract_type ?></td>
+                      <td><?php echo $start_date ?> - <?php echo $end_date ?></td>
                       <td><?php echo $status ?></td>
-                      <th scope="row"><?php echo $created_at ?></th>
+                      <!-- <th scope="row"><?php echo $created_at ?></th> -->
                       <td>
 
 

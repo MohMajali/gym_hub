@@ -3,42 +3,59 @@ session_start();
 
 include "./Connect.php";
 
+$type = $_GET['type'];
+
 if (isset($_POST['Submit'])) {
-
-    $name = $_POST['name'];
-    $password = $_POST['password'];
-    $gender = $_POST['gender'];
-    $city = $_POST['city'];
-    $phone = $_POST['phone'];
     $email = $_POST['email'];
-    $type = 'CLIENT';
+    $phone = $_POST['phone'];
+    $Password = $_POST['password'];
+    $con_password = $_POST['con_password'];
+    $type = $_POST['type'];
 
-    $query = mysqli_query($con, "SELECT * FROM users WHERE email ='$email'");
+    if ($con_password == $Password) {
 
-    if (mysqli_num_rows($query) > 0) {
+        if ($type == 'client') {
 
-        echo "<script language='JavaScript'>
-      alert ('Account With This Email Already Exist! !');
- </script>";
+            $stmt = $con->prepare("UPDATE users SET password = ? WHERE email = ? AND phone = ? AND type = 'CLIENT'");
 
-    } else {
+            $stmt->bind_param("sss", $Password, $email, $phone);
 
-        $stmt = $con->prepare("INSERT INTO users (type, name, email, password, phone, location, gender) VALUES (?, ?, ?, ?, ?, ?, ?) ");
+            if ($stmt->execute()) {
 
-        $stmt->bind_param("sssssss", $type, $name, $email, $password, $phone, $city, $gender);
+                echo "<script language='JavaScript'>
+                alert ('Password Updated Successfully !');
+           </script>";
 
-        if ($stmt->execute()) {
+                echo '<script language="JavaScript">
+                        document.location="./Client_Login.php";
+                        </script>';
 
-            echo "<script language='JavaScript'>
-            alert ('Register Successfully, You Can Login Now !');
-       </script>";
+            }
+        } else {
 
-            echo "<script language='JavaScript'>
-      document.location='./Client_Login.php';
-         </script>";
+            $stmt = $con->prepare("UPDATE gyms SET password = ? WHERE email = ? AND phone = ?");
+
+            $stmt->bind_param("sss", $Password, $email, $phone);
+
+            if ($stmt->execute()) {
+
+                echo "<script language='JavaScript'>
+                alert ('Password Updated Successfully !');
+           </script>";
+
+                echo '<script language="JavaScript">
+                        document.location="./Manager_Login.php";
+                        </script>';
+
+            }
 
         }
 
+    } else {
+
+        echo "<script language='JavaScript'>
+        alert ('Passwords Do Not Match !');
+   </script>";
     }
 
 }
@@ -50,7 +67,7 @@ if (isset($_POST['Submit'])) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Client Register Page</title>
+    <title>Forget Password Page</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
@@ -112,54 +129,43 @@ if (isset($_POST['Submit'])) {
                   <div class="card-body">
                     <div class="pt-4 pb-2">
                       <h5 class="card-title text-center pb-0 fs-4">
-                        Create New Account
+                        Login to Your Account
                       </h5>
                       <p class="text-center small">
-                        Enter your Information
+                        Enter your Email & Password to login
                       </p>
                     </div>
 
-                    <form class="row g-3 needs-validation" method="POST" action="./Client_Register.php" id="login-form">
+                    <form class="row g-3 needs-validation" method="POST" action="./Forget_Password.php?type=<?php echo $type ?>" id="login-form" >
+
+                    <input type="hidden" value="<?php echo $type ?>" name="type">
+
                       <div class="col-12">
-                        <label for="name" class="form-label">Full Name</label>
+                        <label for="email" class="form-label">Email</label>
                         <div class="input-group has-validation">
 
                           <input
                             type="text"
-                            name="name"
-                            class="form-control"
-                            id="name"
-                            required
-                          />
-
-                        </div>
-                      </div>
-
-                      <div class="col-12">
-                        <label for="name" class="form-label">Email</label>
-                        <div class="input-group has-validation">
-
-                          <input
-                            type="email"
                             name="email"
                             class="form-control"
-                            id="name"
+                            id="email"
                             required
                           />
-
+                          <div class="invalid-feedback">
+                            Please enter a valid Email adddress!
+                          </div>
                         </div>
                       </div>
 
-
                       <div class="col-12">
-                        <label for="name" class="form-label">Phone</label>
+                        <label for="phone" class="form-label">Phone</label>
                         <div class="input-group has-validation">
 
                           <input
                             type="text"
                             name="phone"
                             class="form-control"
-                            id="name"
+                            id="phone"
                             pattern="[0-9]{10}" title="Phone Number Must Be 10 Numbers"
                             required
                           />
@@ -167,46 +173,34 @@ if (isset($_POST['Submit'])) {
                         </div>
                       </div>
 
-
-
                       <div class="col-12">
-                        <label for="yourPassword" class="form-label"
-                          >Password</label
-                        >
-                        <input
-                          type="password"
-                          name="password"
-                          class="form-control"
-                          id="yourPassword"
-                          required
-                        />
-                        <div class="invalid-feedback" id="password-Message">
-                          Please enter your password!
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group has-validation">
+
+                          <input
+                            type="password"
+                            name="password"
+                            class="form-control"
+                            id="password"
+                            required
+                          />
+
                         </div>
                       </div>
 
-
-
                       <div class="col-12">
-                      <label for="locationId" class="form-label"
-                          >Select Location</label
-                        >
-                        <select name="city" class="form-select" id="locationId" required>
-                            <option value="location 1">location 1</option>
-                            <option value="location 2">location 2</option>
-                            <option value="location 3">location 3</option>
-                            <option value="location 3">location 3</option>
-                        </select>
-                      </div>
+                        <label for="con_pass" class="form-label">Confirm Password</label>
+                        <div class="input-group has-validation">
 
-                      <div class="col-12">
-                      <label for="locationId" class="form-label"
-                          >Gender</label
-                        >
-                        <select name="gender" class="form-select" id="locationId" required>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
+                          <input
+                            type="password"
+                            name="con_password"
+                            class="form-control"
+                            id="con_pass"
+                            required
+                          />
+
+                        </div>
                       </div>
 
 
@@ -214,13 +208,13 @@ if (isset($_POST['Submit'])) {
 
                       <div class="col-12">
                         <button class="btn btn-primary w-100" type="submit" name="Submit">
-                          Signup
+                          Update Password
                         </button>
                       </div>
                       <div class="col-12">
                         <p class="small mb-0">
-                          Already Have Account
-                          <a href="./Client_Login.php">Login Now</a>
+                          Don't have account?
+                          <a href="./Client_Register.php">Create an account</a>
                         </p>
                       </div>
                     </form>

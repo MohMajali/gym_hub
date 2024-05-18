@@ -93,8 +93,8 @@ if ($C_ID) {
                     <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                         <div class="navbar-nav mx-auto">
                             <a href="index.php" class="nav-item nav-link ">Home</a>
-                            <a href="Store.php" class="nav-item nav-link ">Store</a>
-                            <a href="Gyms.php" class="nav-item nav-link">Gyms</a>
+                            <a href="Cart.php" class="nav-item nav-link ">Cart</a>
+                            <a href="Store.php" class="nav-item nav-link">Store</a>
 
                             <?php if ($C_ID) {?>
 
@@ -160,12 +160,12 @@ if ($C_ID) {
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th scope="col">Order #</th>
                                             <th scope="col">Item</th>
                                             <th scope="col">Name</th>
                                             <th scope="col">Price</th>
                                             <th scope="col">Quantity</th>
                                             <th scope="col">Total</th>
+                                            <th scope="col">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -173,31 +173,23 @@ if ($C_ID) {
 
 
                                     <?php
-$sql1 = mysqli_query($con, "SELECT * from orders WHERE client_id = '$C_ID' AND status = 'Done' ORDER BY id DESC");
+$sql1 = mysqli_query($con, "SELECT * from carts WHERE customer_id = '$C_ID' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 
-    $order_id = $row1['id'];
-    $client_id = $row1['client_id'];
-    $total_price = $row1['total_price'];
+    $cart_id = $row1['id'];
+    $product_id = $row1['product_id'];
+    $qty = $row1['qty'];
 
-    $sql2 = mysqli_query($con, "SELECT * from order_items WHERE order_id = '$order_id'");
+    $sql2 = mysqli_query($con, "SELECT * from store_items WHERE id = '$product_id'");
     $row2 = mysqli_fetch_array($sql2);
 
-    $product_id = $row2['product_id'];
-    $qty = $row2['qty'];
-    $total_price_row2 = $row2['total_price'];
-
-    $sql3 = mysqli_query($con, "SELECT * from store_items WHERE id = '$product_id'");
-    $row3 = mysqli_fetch_array($sql3);
-
-    $item_name = $row3['title'];
-    $item_image = $row3['image'];
-    $price = $row3['price'];
+    $item_name = $row2['title'];
+    $price = $row2['price'];
+    $item_image = $row2['image'];
 
     ?>
                                         <tr>
-                                        <td class="py-5"><?php echo $order_id ?></td>
 
                                             <th scope="row">
                                                 <div class="d-flex align-items-center mt-2">
@@ -207,7 +199,10 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                                             <td class="py-5"><?php echo $item_name ?></td>
                                             <td class="py-5"><?php echo $price ?> JDs</td>
                                             <td class="py-5"><?php echo $qty ?></td>
-                                            <td class="py-5"><?php echo $total_price_row2 ?> JDs</td>
+                                            <td class="py-5"><?php echo $price * $qty ?> JDs</td>
+                                            <td class="py-5">
+                                                <a href="DeleteFromCart.php?cart_id=<?php echo $cart_id?>" class="btn btn-danger">Delete</a>
+                                            </td>
                                         </tr>
 
 
@@ -219,11 +214,16 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
                                     </tbody>
                                 </table>
+
+
                             </div>
 
 
 
                         </div>
+
+                        <a href="./checkout.php" class="btn text-left">Go To Check Out</a>
+
                     </div>
                 </form>
             </div>

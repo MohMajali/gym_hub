@@ -143,34 +143,52 @@ if (!$A_ID) {
                   <thead>
                     <tr>
                       <th scope="col">ID</th>
-                      <th scope="col">Gym Title</th>
                       <th scope="col">Manager Name</th>
+                      <th scope="col">Manager Email</th>
+                      <th scope="col">Manager Phone</th>
                       <th scope="col">Created At</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                   <?php
-$sql1 = mysqli_query($con, "SELECT * from gyms ORDER BY id DESC");
+$sql1 = mysqli_query($con, "SELECT * from users WHERE type = 'Manager' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 
-    $gym_id = $row1['id'];
-    $gym_title = $row1['title'];
-    $manager_id = $row1['manager_id'];
-
-    $sql2 = mysqli_query($con, "SELECT * from users WHERE id = '$manager_id'");
-    $row2 = mysqli_fetch_array($sql2);
-
-    $manager_name = $row2['id'];
-    $created_at = $row2['created_at'];
+    $manager_id = $row1['id'];
+    $manager_name = $row1['name'];
+    $manager_email = $row1['email'];
+    $manager_phone = $row1['phone'];
+    $active = $row1['active'];
+    $created_at = $row1['created_at'];
 
 
     ?>
                     <tr>
-                      <th scope="row"><?php echo $gym_id ?></th>
-                      <td><?php echo $gym_title ?></td>
+                      <th scope="row"><?php echo $manager_id ?></th>
                       <td><?php echo $manager_name ?></td>
+                      <td><?php echo $manager_email ?></td>
+                      <td><?php echo $manager_phone ?></td>
                       <th scope="row"><?php echo $created_at ?></th>
+                      <th scope="row">
+
+
+                      <?php if($active == 1){ ?>
+
+                        <a href="./DeleteOrRestoreManager.php?manager_id=<?php echo $manager_id ?>&&active=0" class="btn btn-danger">Remove</a>
+
+                      <?php } else {?>
+
+
+                        <a href="./DeleteOrRestoreManager.php?manager_id=<?php echo $manager_id ?>&&active=1" class="btn btn-primary">Activate</a>
+
+                      <?php } ?>
+
+                      
+
+
+                      </th>
 
                     </tr>
 <?php
@@ -203,7 +221,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
     <script>
     window.addEventListener('DOMContentLoaded', (event) => {
-     document.querySelector('#sidebar-nav .nav-item:nth-child(4) .nav-link').classList.remove('collapsed')
+     document.querySelector('#sidebar-nav .nav-item:nth-child(6) .nav-link').classList.remove('collapsed')
    });
 </script>
 

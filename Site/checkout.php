@@ -5,9 +5,6 @@ include "../Connect.php";
 
 $C_ID = $_SESSION['U_Log'];
 
-$item_id = $_GET['item_id'];
-$qty = $_GET['qty'];
-
 if ($C_ID) {
 
     $sql1 = mysqli_query($con, "select * from users where id='$C_ID'");
@@ -19,71 +16,100 @@ if ($C_ID) {
     if (isset($_POST['Submit'])) {
 
         $C_ID = $_POST['C_ID'];
-        $item_id = $_POST['item_id'];
-        $qty = $_POST['qty'];
-        $total_price = $_POST['total_price'];
 
-        $stmt = $con->prepare("INSERT INTO orders (client_id, item_id, quantity, total_price) VALUES (?, ?, ?, ?) ");
+        $sql1 = mysqli_query($con, "SELECT * from carts WHERE customer_id = '$C_ID'");
 
-        $stmt->bind_param("iiid", $C_ID, $item_id, $qty, $total_price);
+        $totalPrice = 0;
 
-        if ($stmt->execute()) {
+        while ($row1 = mysqli_fetch_array($sql1)) {
 
-            $stmt = $con->prepare("SELECT quantity FROM store_items WHERE id = ?");
+            $product_id = $row1['product_id'];
+            $qty = $row1['qty'];
 
-            $stmt->bind_param("i", $item_id);
+            $sql2 = mysqli_query($con, "SELECT * from store_items WHERE id = '$product_id'");
+            $row2 = mysqli_fetch_array($sql2);
 
-            $stmt->execute();
+            $price = $row2['price'];
 
-            $stmt->store_result();
+            $totalPrice += ($price * $qty);
 
-            if ($stmt->num_rows > 0) {
-
-               
-
-                $stmt->bind_result($quantity);
-                $stmt->fetch();
+        }
+        
 
 
-                $newQty = $quantity - $qty;
+        $addOrderStmt = $con->prepare("INSERT INTO orders (client_id, total_price) VALUES (?, ?) ");
+        $addOrderStmt->bind_param("id", $C_ID, $totalPrice);
 
-            
+        $status = 'Pending';
+        $orderId = 0;
 
-                $stmt = $con->prepare("UPDATE store_items SET quantity = ? WHERE id = ? ");
+        if ($addOrderStmt->execute()) {
 
-                $stmt->bind_param("ii", $newQty, $item_id);
+            $getOrderIdStmt = $con->prepare("SELECT id FROM orders WHERE status = ? AND client_id = ?");
+            $getOrderIdStmt->bind_param("si", $status, $C_ID);
+            $getOrderIdStmt->execute();
+            $getOrderIdStmt->store_result();
 
-                if ($stmt->execute()) {
+            if ($getOrderIdStmt->num_rows > 0) {
 
-                    echo "<script language='JavaScript'>
-                    alert ('Added To Orders !');
-               </script>";
+                $getOrderIdStmt->bind_result($id);
+                $getOrderIdStmt->fetch();
 
-                    echo "<script language='JavaScript'>
-              document.location='./Orders.php';
-                 </script>";
+                $orderId = $id;
+
+                $sql1 = mysqli_query($con, "SELECT * from carts WHERE customer_id = '$C_ID' ORDER BY id DESC");
+
+                $totalPrice = 0;
+                $isDone = false;
+
+                while ($row1 = mysqli_fetch_array($sql1)) {
+
+                    $product_id = $row1['product_id'];
+                    $qty = $row1['qty'];
+
+                    $sql2 = mysqli_query($con, "SELECT * from store_items WHERE id = '$product_id'");
+                    $row2 = mysqli_fetch_array($sql2);
+
+                    $price = $row2['price'];
+
+                    $total_price = ($price * $qty);
+
+                    $addOrderItemsStmt = $con->prepare("INSERT INTO order_items (order_id, product_id, qty, total_price) VALUES (?, ?, ?, ?) ");
+
+                    $addOrderItemsStmt->bind_param("iiid", $orderId, $product_id, $qty, $total_price);
+
+                    $addOrderItemsStmt->execute();
+
                 }
+
+                $isDone = true;
+                $status = 'Done';
+
+                if ($isDone) {
+
+                    $updateOrderStatusStmt = $con->prepare("UPDATE orders set status = ? WHERE id = ? ");
+
+                    $updateOrderStatusStmt->bind_param("si", $status, $orderId);
+
+                    if ($updateOrderStatusStmt->execute()) {
+
+                        echo "<script language='JavaScript'>
+                        alert ('Added To Orders !');
+                   </script>";
+
+                        echo "<script language='JavaScript'>
+                  document.location='./Orders.php';
+                     </script>";
+                    }
+
+                }
+
             }
 
         }
     }
 
 }
-
-$sql2 = mysqli_query($con, "select * from store_items where id='$item_id'");
-$row2 = mysqli_fetch_array($sql2);
-
-$category_id = $row2['category_id'];
-$title = $row2['title'];
-$item_image = $row2['image'];
-$active = $row2['active'];
-$price = $row2['price'];
-$description = $row2['description'];
-
-$sql3 = mysqli_query($con, "SELECT * from categories WHERE id = '$category_id'");
-$row3 = mysqli_fetch_array($sql3);
-
-$category_name = $row3['name'];
 
 ?>
 
@@ -172,6 +198,7 @@ $category_name = $row3['name'];
                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><?php echo $name ?></a>
                                 <div class="dropdown-menu m-0 bg-secondary rounded-0">
                                     <a href="Account.php" class="dropdown-item">Account</a>
+                                    <a href="Cart.php" class="dropdown-item">Cart</a>
                                     <a href="Orders.php" class="dropdown-item">Orders</a>
                                     <a href="Subscriptions.php" class="dropdown-item">Subsciptions</a>
                                     <a href="Logout.php" class="dropdown-item">Logout</a>
@@ -219,16 +246,91 @@ $category_name = $row3['name'];
         <div class="container-fluid py-5">
             <div class="container py-5">
                 <h1 class="mb-4">Billing details</h1>
+
+
+
                 <form action="./checkout.php?item_id=<?php echo $item_id ?>&qty=<?php echo $qty ?>" method="POST">
 
-                <input type="hidden" name="item_id" value="<?php echo $item_id ?>">
-                <input type="hidden" name="qty" value="<?php echo $qty ?>">
                 <input type="hidden" name="C_ID" value="<?php echo $C_ID ?>">
-                <input type="hidden" name="total_price" value="<?php echo $price * $qty ?>">
 
                     <div class="row g-5">
 
-                        <div class="col-md-12 col-lg-12 col-xl-12">
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="col-md-6 col-lg-6 col-xl-6">
+
+
+
+
+
+
+
+
+
+    <div class="form-item">
+        <label class="form-label my-3">Payment Type<sup>*</sup></label>
+        <select onchange="paymentType(event)" name="payment_type" id="payment_type"
+         class="form-select" id="" required>
+
+
+         <option value="E-Payment">E-Payment</option>
+        <option value="Cash">Cash</option>
+
+
+
+
+
+        </select>
+    </div>
+
+
+    <div id="e-payment">
+    <div class="form-item">
+        <label class="form-label my-3">Card Number </label>
+        <input type="text" pattern="[0-9]{16}" class="form-control" >
+    </div>
+
+    <div class="form-item">
+        <label class="form-label my-3">Card Holder Name </label>
+        <input type="text"  class="form-control" >
+    </div>
+
+    <div class="form-item">
+        <label class="form-label my-3">Expiry Date </label>
+        <input type="date"  class="form-control" >
+    </div>
+
+    <div class="form-item">
+        <label class="form-label my-3">CVV </label>
+        <input type="text" pattern="[0-9]{3}" class="form-control" >
+    </div>
+
+
+    </div>
+
+    <div class="row g-4 text-center align-items-center justify-content-center pt-4">
+                                <button type="Submit" name="Submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
+                            </div>
+
+
+</div>
+
+
+
+
+
+
+
+                        <div class="col-md-6 col-lg-6 col-xl-6">
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
@@ -241,26 +343,78 @@ $category_name = $row3['name'];
                                         </tr>
                                     </thead>
                                     <tbody>
+
+                                    <?php
+$sql1 = mysqli_query($con, "SELECT * from carts WHERE customer_id = '$C_ID' ORDER BY id DESC");
+
+$totalPrice = 0;
+
+while ($row1 = mysqli_fetch_array($sql1)) {
+
+    $cart_id = $row1['id'];
+    $product_id = $row1['product_id'];
+    $qty = $row1['qty'];
+
+    $sql2 = mysqli_query($con, "SELECT * from store_items WHERE id = '$product_id'");
+    $row2 = mysqli_fetch_array($sql2);
+
+    $item_name = $row2['title'];
+    $price = $row2['price'];
+    $item_image = $row2['image'];
+
+    $totalPrice += ($price * $qty)
+
+    ?>
+
                                         <tr>
                                             <th scope="row">
                                                 <div class="d-flex align-items-center mt-2">
                                                     <img src="../Admin_Dashboard/<?php echo $item_image ?>" class="img-fluid rounded-circle" style="width: 90px; height: 90px;" alt="">
                                                 </div>
                                             </th>
-                                            <td class="py-5"><?php echo $title ?></td>
+                                            <td class="py-5"><?php echo $item_name ?></td>
                                             <td class="py-5"><?php echo $price ?> JDs</td>
                                             <td class="py-5"><?php echo $qty ?></td>
                                             <td class="py-5"><?php echo $price * $qty ?> JDs</td>
                                         </tr>
+
+                                        <?php
+}?>
+
+
+
+
                                     </tbody>
+
+                                    <tfoot>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td><?php echo $totalPrice ?> JDs</td>
+                                    </tfoot>
+
                                 </table>
                             </div>
 
 
-                            <div class="row g-4 text-center align-items-center justify-content-center pt-4">
-                                <button type="Submit" name="Submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
-                            </div>
+
                         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     </div>
                 </form>
             </div>
@@ -289,6 +443,31 @@ $category_name = $row3['name'];
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+
+    <script>
+
+
+
+const paymentType = (e) => {
+
+    let paymentTypeVar = document.getElementById('payment_type').value
+    console.log(paymentTypeVar);
+
+        if(paymentTypeVar == 'E-Payment'){
+
+            document.getElementById("e-payment").style.display = 'block'
+
+        } else {
+
+            document.getElementById("e-payment").style.display = 'none'
+
+
+        }
+}
+
+
+    </script>
     </body>
 
 </html>

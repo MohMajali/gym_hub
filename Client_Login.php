@@ -7,7 +7,7 @@ if (isset($_POST['Submit'])) {
     $email = $_POST['email'];
     $Password = $_POST['password'];
 
-    $query = mysqli_query($con, "SELECT * FROM users WHERE email ='$email' AND password = '$Password'");
+    $query = mysqli_query($con, "SELECT * FROM users WHERE email ='$email' AND password = '$Password' AND type = 'CLIENT'");
 
     if (mysqli_num_rows($query) > 0) {
 
@@ -35,13 +35,13 @@ if (isset($_POST['Submit'])) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Login Page</title>
+    <title>Client Login Page</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
     <!-- Favicons -->
-    <link href="assets/img/logo.jpeg" rel="icon" />
-    <link href="assets/img/logo.jpeg" rel="apple-touch-icon" />
+    <link href="assets/img/Logo.jpg" rel="icon" />
+    <link href="assets/img/Logo.jpg" rel="apple-touch-icon" />
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -85,7 +85,7 @@ if (isset($_POST['Submit'])) {
                     href="index.php"
                     class="logo d-flex align-items-center w-auto"
                   >
-                    <img src="assets/img/logo.jpeg" alt="" width="50px"/>
+                    <img src="assets/img/Logo.jpg" alt="" width="50px"/>
                     <span class="d-none d-lg-block text-uppercase"
                       >GymHub</span
                     >
@@ -136,6 +136,13 @@ if (isset($_POST['Submit'])) {
                         <div class="invalid-feedback" id="password-Message">
                           Please enter your password!
                         </div>
+                      </div>
+
+                      <div class="col-12">
+                          
+                          <a href="./Forget_Password.php?type=client" class="form-check-label" for="rememberMe"
+                            >Forgot Password?</a
+                          >
                       </div>
 
                       <div class="col-12">

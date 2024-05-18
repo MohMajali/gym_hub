@@ -3,34 +3,35 @@ session_start();
 
 include "../Connect.php";
 
-$G_ID = $_SESSION['G_Log'];
+$M_ID = $_SESSION['M_Log'];
 
-if (!$G_ID) {
+if (!$M_ID) {
 
     echo '<script language="JavaScript">
-     document.location="../Gym_Login.php";
+     document.location="../Manager_Login.php";
     </script>';
 
 } else {
 
-    $sql1 = mysqli_query($con, "select * from gyms where id='$G_ID'");
+    $sql1 = mysqli_query($con, "select * from gyms where manager_id='$M_ID'");
     $row1 = mysqli_fetch_array($sql1);
 
+    $gym_id = $row1['id'];
     $name = $row1['title'];
     $email = $row1['email'];
 
     if (isset($_POST['Submit'])) {
 
-        $G_ID = $_POST['G_ID'];
+        $gym_id = $_POST['gym_id'];
         $name = $_POST['name'];
         $price = $_POST['price'];
-        $duration = $_POST['duration'];
+        $duration = $_POST['duration'] . ' days';
         $description = $_POST['description'];
 
 
         $stmt = $con->prepare("INSERT INTO gym_offers (gym_id, name, price, duration, description) VALUES (?, ?, ?, ?, ?) ");
 
-        $stmt->bind_param("issss", $G_ID, $name, $price, $duration, $description);
+        $stmt->bind_param("issss", $gym_id, $name, $price, $duration, $description);
 
         if ($stmt->execute()) {
 
@@ -185,7 +186,7 @@ if (!$G_ID) {
                 <form method="POST" action="./Offers.php" enctype="multipart/form-data">
 
 
-<input type="hidden" name="G_ID" value="<?php echo $G_ID ?>" id="">
+<input type="hidden" name="gym_id" value="<?php echo $gym_id ?>" id="">
 
                   <div class="row mb-3">
                     <label for="inputText" class="col-sm-4 col-form-label"
@@ -210,7 +211,7 @@ if (!$G_ID) {
                       >Duration</label
                     >
                     <div class="col-sm-8">
-                      <input type="text" name="duration" class="form-control" />
+                      <input type="number" name="duration" class="form-control" />
                     </div>
                   </div>
 
@@ -266,7 +267,7 @@ if (!$G_ID) {
                   </thead>
                   <tbody>
                   <?php
-$sql1 = mysqli_query($con, "SELECT * from gym_offers WHERE gym_id = '$G_ID' ORDER BY id DESC");
+$sql1 = mysqli_query($con, "SELECT * from gym_offers WHERE gym_id = '$gym_id' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 

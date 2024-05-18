@@ -3,46 +3,74 @@ session_start();
 
 include "../Connect.php";
 
-$G_ID = $_SESSION['G_Log'];
+$M_ID = $_SESSION['M_Log'];
 
-if (!$G_ID) {
+if (!$M_ID) {
 
     echo '<script language="JavaScript">
-     document.location="../Gym_Login.php";
+     document.location="../Manager_Login.php";
     </script>';
 
 } else {
 
-    $sql1 = mysqli_query($con, "select * from gyms where id='$G_ID'");
+    $sql1 = mysqli_query($con, "select * from gyms where manager_id = '$M_ID'");
     $row1 = mysqli_fetch_array($sql1);
 
+    $gym_id = $row1['id'];
     $title = $row1['title'];
     $email = $row1['email'];
     $phone = $row1['phone'];
     $password = $row1['password'];
 
-
     if (isset($_POST['Submit'])) {
 
-        $G_ID = $_POST['G_ID'];
+        $gym_id = $_POST['gym_id'];
         $title = $_POST['title'];
         $email = $_POST['email'];
         $phone = $_POST['phone'];
         $password = $_POST['password'];
 
-        $stmt = $con->prepare("UPDATE gyms SET title = ?, password = ?, phone = ?, email = ? WHERE id = ? ");
+        $image = $_FILES["file"]["name"];
 
-        $stmt->bind_param("ssssi", $title, $password, $phone, $email, $G_ID);
+        if ($image) {
 
-        if ($stmt->execute()) {
+            $image = 'Gyms_Images/' . $image;
 
-            echo "<script language='JavaScript'>
+            $stmt = $con->prepare("UPDATE gyms SET title = ?, password = ?, phone = ?, email = ?, image = ? WHERE id = ? ");
+
+            $stmt->bind_param("sssssi", $title, $password, $phone, $email, $image, $gym_id);
+
+            if ($stmt->execute()) {
+
+                move_uploaded_file($_FILES["file"]["tmp_name"], "./Gyms_Images/" . $_FILES["file"]["name"]);
+
+                echo "<script language='JavaScript'>
+                alert ('Account Updated Successfully !');
+           </script>";
+
+                echo "<script language='JavaScript'>
+          document.location='./Account.php';
+             </script>";
+
+            }
+
+        } else {
+
+            $stmt = $con->prepare("UPDATE gyms SET title = ?, password = ?, phone = ?, email = ? WHERE id = ? ");
+
+            $stmt->bind_param("ssssi", $title, $password, $phone, $email, $gym_id);
+
+            if ($stmt->execute()) {
+
+                echo "<script language='JavaScript'>
               alert ('Account Updated Successfully !');
          </script>";
 
-            echo "<script language='JavaScript'>
+                echo "<script language='JavaScript'>
         document.location='./Account.php';
            </script>";
+
+            }
 
         }
 
@@ -168,7 +196,7 @@ if (!$G_ID) {
                 <!-- Horizontal Form -->
                 <form method="POST" action="./Account.php" enctype="multipart/form-data">
 
-                <input type="hidden" name="G_ID" value="<?php echo $G_ID ?>">
+                <input type="hidden" name="gym_id" value="<?php echo $gym_id ?>">
 
                   <div class="row mb-3">
                     <label for="inputEmail3" class="col-sm-2 col-form-label"
@@ -193,7 +221,7 @@ if (!$G_ID) {
                       >Phone</label
                     >
                     <div class="col-sm-10">
-                      <input type="text" name="phone" value="<?php echo $phone ?>" 
+                      <input type="text" name="phone" value="<?php echo $phone ?>"
                       pattern="[0-9]{10}" title="Phone Number Must Be 10 Numbers"
                       class="form-control" id="inputText" />
                     </div>
@@ -205,6 +233,15 @@ if (!$G_ID) {
                     >
                     <div class="col-sm-10">
                       <input type="password" name="password" value="<?php echo $password ?>" class="form-control" id="inputText" />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label"
+                      >Image</label
+                    >
+                    <div class="col-sm-10">
+                      <input type="file" name="file" class="form-control" id="inputText" />
                     </div>
                   </div>
 

@@ -117,6 +117,7 @@ $category_name = $row3['name'];
                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><?php echo $name ?></a>
                                 <div class="dropdown-menu m-0 bg-secondary rounded-0">
                                     <a href="Account.php" class="dropdown-item">Account</a>
+                                    <a href="Cart.php" class="dropdown-item">Cart</a>
                                     <a href="Orders.php" class="dropdown-item">Orders</a>
                                     <a href="Subscriptions.php" class="dropdown-item">Subsciptions</a>
                                     <a href="Logout.php" class="dropdown-item">Logout</a>
@@ -186,21 +187,23 @@ $category_name = $row3['name'];
                                 <p class="mb-4"><?php echo $description ?></p>
                                 <div class="input-group quantity mb-5" style="width: 100px;">
 
-                                <!-- <input type="hidden" name="item_id" id="item_id_hidden" value="<?php echo $item_id ?>"> -->
+
+                                <input type="hidden" value="<?php echo $C_ID ?>" name="C_ID" id="C_ID">
+                                <input type="hidden" value="<?php echo $item_id ?>" name="item_id" id="item_id">
 
 
 
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                    <input type="number" name="qty" id="item_qty" class="form-control form-control-sm text-center border-0" value="1" min="1" max="<?php echo $quantity ?>">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </div>
+                                <?php if ($quantity > 0) {?>
+
+                                    <select name="qty" id="item_qty">
+                                        <?php for ($i = 1; $i <= $quantity; $i++) {?>
+                                            <option value="<?php echo $i ?>"><?php echo $i ?></option>
+                                        <?php }?>
+                                    </select>
+                                    <?php } else {?>
+
+                                        <h5>Out Of Stock</h5>
+                                    <?php }?>
                             </div>
 
 
@@ -210,7 +213,17 @@ $category_name = $row3['name'];
                             <?php if ($C_ID) {?>
 
 
-                                <button onclick="navigate(event)" id="buy_item-<?php echo $item_id ?>" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class=" me-2 text-primary"></i> Buy Item</button>
+                                <?php if ($quantity > 0) {?>
+
+
+                                <button onclick="navigate(event)" id="buy_item-<?php echo $item_id ?>" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class=" me-2 text-primary"></i> Add To Cart</button>
+
+                                
+                                <?php }?>
+
+
+
+
 
                                 <?php } else {?>
 
@@ -285,7 +298,16 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                                 <h4><?php echo $title ?></h4>
                                 <p><?php echo $description ?></p>
                                 <div class="d-flex justify-content-between flex-lg-wrap">
-                                    <p class="text-dark fs-5 fw-bold"><?php echo $price ?></p>
+                                    <p class="text-dark fs-5 fw-bold"><?php
+
+    if ($quantity > 0) {
+
+        echo $price;
+    } else {
+        echo "Out Of Stock";
+    }
+
+    ?></p>
                                     <a href="./Item.php?item_id=<?php echo $item_id ?>" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class=" me-2 text-primary"></i> View Item</a>
                                 </div>
                             </div>
@@ -331,10 +353,43 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 <script>
 
 const navigate = (e) => {
-            const itemId = e.target.id.split('-')[1]
-            const qty = document.getElementById('item_qty').value;
+            // const itemId = e.target.id.split('-')[1]
+            // const qty = document.getElementById('item_qty').value;
 
-            document.location = `./checkout.php?item_id=${itemId}&qty=${qty}`;
+            // document.location = `./checkout.php?item_id=${itemId}&qty=${qty}`;
+
+
+
+            const qty = document.getElementById('item_qty').value
+            const clientId = document.getElementById('C_ID').value
+            const itemId = document.getElementById('item_id').value
+
+            $.ajax({
+                type: "POST",
+                url: "./AddToCart.php",
+                data: {
+                    qty: qty,
+                    customer_id: clientId,
+                    product_id: itemId
+                },
+                success: function(response) {
+
+                    if(!JSON.parse(response).error){
+
+                        alert ('Added To Cart !');
+
+                    }
+
+                },
+                error: function(error) {
+                    console.error('Error updating quantity:', error);
+                }
+            });
+
+
+
+
+
         }
 
 

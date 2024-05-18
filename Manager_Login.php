@@ -7,18 +7,28 @@ if (isset($_POST['Submit'])) {
     $email = $_POST['email'];
     $Password = $_POST['password'];
 
-    $query = mysqli_query($con, "SELECT * FROM gyms WHERE email ='$email' AND password = '$Password'");
+    $query = mysqli_query($con, "SELECT * FROM users WHERE email ='$email' AND password = '$Password'");
 
     if (mysqli_num_rows($query) > 0) {
 
         $row = mysqli_fetch_array($query);
 
-        $G_ID = $row['id'];
-        $_SESSION['G_Log'] = $G_ID;
+        if ($row['active'] == 0) {
 
-        echo '<script language="JavaScript">
-        document.location="Gym_Dashboard/";
-        </script>';
+            echo "<script language='JavaScript'>
+          alert ('Please Contact Support To Activate Your Account !');
+     </script>";
+
+        } else  {
+
+            $M_ID = $row['id'];
+            $_SESSION['M_Log'] = $M_ID;
+
+            echo '<script language="JavaScript">
+          document.location="Gym_Dashboard/";
+          </script>';
+
+        }
 
     } else {
 
@@ -35,13 +45,13 @@ if (isset($_POST['Submit'])) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Login Page</title>
+    <title>Gym Manager Login Page</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
     <!-- Favicons -->
-    <link href="assets/img/logo.jpeg" rel="icon" />
-    <link href="assets/img/logo.jpeg" rel="apple-touch-icon" />
+    <link href="assets/img/Logo.jpg" rel="icon" />
+    <link href="assets/img/Logo.jpg" rel="apple-touch-icon" />
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -85,7 +95,7 @@ if (isset($_POST['Submit'])) {
                     href="index.php"
                     class="logo d-flex align-items-center w-auto"
                   >
-                    <img src="assets/img/logo.jpeg" alt="" width="50px"/>
+                    <img src="assets/img/Logo.jpg" alt="" width="50px"/>
                     <span class="d-none d-lg-block text-uppercase"
                       >GymHub</span
                     >
@@ -104,7 +114,7 @@ if (isset($_POST['Submit'])) {
                       </p>
                     </div>
 
-                    <form class="row g-3 needs-validation" method="POST" action="./Gym_Login.php" id="login-form" >
+                    <form class="row g-3 needs-validation" method="POST" action="./Manager_Login.php" id="login-form" >
                       <div class="col-12">
                         <label for="email" class="form-label">Email</label>
                         <div class="input-group has-validation">
@@ -139,6 +149,13 @@ if (isset($_POST['Submit'])) {
                       </div>
 
                       <div class="col-12">
+
+                          <a href="./Forget_Password.php?type=gym" class="form-check-label" for="rememberMe"
+                            >Forgot Password?</a
+                          >
+                      </div>
+
+                      <div class="col-12">
                         <div class="form-check">
                           <input
                             class="form-check-input"
@@ -160,7 +177,7 @@ if (isset($_POST['Submit'])) {
                       <div class="col-12">
                         <p class="small mb-0">
                           Don't have account?
-                          <a href="./Manager_Register.php">Create an account</a>
+                          <a href="./Gym_Register.php">Create an account</a>
                         </p>
                       </div>
                     </form>

@@ -17,7 +17,7 @@ if ($stmt->execute()) {
         </script>";
 
         echo "<script language='JavaScript'>
-        document.location='./Gyms.php';
+        document.location='./Gyms_Requestes.php';
         </script>";
 
     } else {
@@ -26,7 +26,7 @@ alert ('Category Has Been Rejected Successfully !');
 </script>";
 
         echo "<script language='JavaScript'>
-document.location='./Gyms.php';
+document.location='./Gyms_Requestes.php';
 </script>";
     }
 

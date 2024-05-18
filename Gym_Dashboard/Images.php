@@ -3,19 +3,20 @@ session_start();
 
 include "../Connect.php";
 
-$G_ID = $_SESSION['G_Log'];
+$M_ID = $_SESSION['M_Log'];
 
-if (!$G_ID) {
+if (!$M_ID) {
 
     echo '<script language="JavaScript">
-     document.location="../Gym_Login.php";
+     document.location="../Manager_Login.php";
     </script>';
 
 } else {
 
-    $sql1 = mysqli_query($con, "select * from gyms where id='$G_ID'");
+    $sql1 = mysqli_query($con, "select * from gyms where manager_id='$M_ID'");
     $row1 = mysqli_fetch_array($sql1);
 
+    $gym_id = $row1['id'];
     $name = $row1['title'];
     $email = $row1['email'];
     $phone = $row1['phone'];
@@ -23,14 +24,14 @@ if (!$G_ID) {
 
     if (isset($_POST['Submit'])) {
 
-        $G_ID = $_POST['G_ID'];
+        $gym_id = $_POST['gym_id'];
         $image = $_FILES["file"]["name"];
 
         $image = 'Gyms_Images/' . $image;
 
         $stmt = $con->prepare("INSERT INTO gym_images (gym_id, image) VALUES (?, ?) ");
 
-        $stmt->bind_param("is", $G_ID, $image);
+        $stmt->bind_param("is", $gym_id, $image);
 
         if ($stmt->execute()) {
 
@@ -186,7 +187,7 @@ if (!$G_ID) {
 
                 <form method="POST" action="./Images.php" enctype="multipart/form-data">
 
-                <input type="hidden" name="G_ID" value="<?php echo $G_ID ?>" class="form-control" />
+                <input type="hidden" name="gym_id" value="<?php echo $gym_id ?>" class="form-control" />
 
 
                   <div class="row mb-3">
@@ -238,7 +239,7 @@ if (!$G_ID) {
                   </thead>
                   <tbody>
 <?php
-$sql1 = mysqli_query($con, "SELECT * from gym_images WHERE gym_id = '$G_ID' ORDER BY id DESC");
+$sql1 = mysqli_query($con, "SELECT * from gym_images WHERE gym_id = '$gym_id' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 

@@ -121,6 +121,7 @@ if ($C_ID) {
                                 <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown"><?php echo $name ?></a>
                                 <div class="dropdown-menu m-0 bg-secondary rounded-0">
                                     <a href="Account.php" class="dropdown-item">Account</a>
+                                    <a href="Cart.php" class="dropdown-item">Cart</a>
                                     <a href="Orders.php" class="dropdown-item">Orders</a>
                                     <a href="Subscriptions.php" class="dropdown-item">Subsciptions</a>
                                     <a href="Logout.php" class="dropdown-item">Logout</a>
@@ -183,7 +184,10 @@ if ($C_ID) {
                                             <th scope="col">Gym</th>
                                             <th scope="col">Offer</th>
                                             <th scope="col">Duration</th>
-                                            <th scope="col">Actions</th>
+                                            <th scope="col">Stauts</th>
+                                            <th scope="col">Created At</th>
+                                            <th scope="col">Rate</th>
+                                            <th scope="col">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -202,6 +206,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
     $start_date = $row1['start_date'];
     $end_date = $row1['end_date'];
     $created_at = $row1['created_at'];
+    $status = $row1['status'];
 
     $sql2 = mysqli_query($con, "SELECT * from gyms WHERE id = '$gym_id'");
     $row2 = mysqli_fetch_array($sql2);
@@ -231,11 +236,13 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                                             <td class="py-5"><?php echo $gym_name ?></td>
                                             <td class="py-5"><?php echo $offer_name ?? "NON" ?></td>
                                             <td class="py-5"><?php echo $start_date ?> - <?php echo $end_date ?></td>
+                                            <td class="py-5"><?php echo $status ?></td>
+                                            <td class="py-5"><?php echo $created_at ?></td>
                                             <td class="py-5 text-center mr-4" dir="rtl">
 
 
 
-<?php if(!$rate_id) { ?>
+<?php if (!$rate_id) {?>
 
 
 <a href="Rate_Gym.php?Rate=5&gym_id=<?php echo $gym_id; ?>&C_ID=<?php echo $C_ID; ?>" role="button" class="star"><i title="5" class="fa fa-star"></i></a>
@@ -248,9 +255,17 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
 <a href="Rate_Gym.php?Rate=1&gym_id=<?php echo $gym_id; ?>&C_ID=<?php echo $C_ID; ?>" role="button" class="star"><i title="1" class="fa fa-star"></i></a>
 
-<?php } ?>
+<?php }?>
 
 
+
+                                            </td>
+                                            <td class="py-5">
+
+<?php if ($status != 'Cancel') {?>
+                                            <a href="JavaScript:if(confirm('Are You Sure To Cancel This Subscription ?')==true)
+{window.location='CancelSubscription.php?subcription_id=<?php echo $subcription_id; ?>&status=Canceled';}" class="btn btn-danger">Cancel</a>
+<?php }?>
 
                                             </td>
                                         </tr>

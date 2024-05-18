@@ -14,17 +14,51 @@
       </a>
     </li>
 
-    <li class="nav-item">
-      <a class="nav-link collapsed" href="./Gyms.php">
-        <i class="i bi-buildings"></i><span>Gyms</span>
-      </a>
-    </li>
 
     <li class="nav-item">
-      <a class="nav-link collapsed" href="./Gym_Managers.php">
-        <i class="bi bi-person-fill-gear"></i><span>Gym Managers</span>
-      </a>
-    </li>
+        <a class="nav-link collapsed" data-bs-target="#gyms-nav" data-bs-toggle="collapse" href="#">
+          <i class="i bi-buildings"></i><span>Gyms</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="gyms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+
+
+
+
+        <li>
+            <a href="./Gyms_Requestes.php">
+              <i class="bi bi-circle"></i><span>Gyms Requestes</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="./Gym_Managers.php">
+              <i class="bi bi-circle"></i><span>Gyms Managers</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="./Gyms_Contracts.php">
+              <i class="bi bi-circle"></i><span>Gyms Contracts</span>
+            </a>
+          </li>
+
+
+
+          <li>
+            <a href="./Accpeted_Gyms.php">
+              <i class="bi bi-circle"></i><span>Accpeted Gyms</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="./Rejected_Gyms.php">
+              <i class="bi bi-circle"></i><span>Rejected Gyms</span>
+            </a>
+          </li>
+
+        </ul>
+      </li>
+
 
     <li class="nav-item">
       <a class="nav-link collapsed" href="./Store_Items.php">

@@ -20,22 +20,18 @@ if ($C_ID) {
 
         $C_ID = $_POST['C_ID'];
         $gym_id = $_POST['gym_id'];
-        $offer_id = $_POST['offer_id'];
-        $end_date = $_POST['end_date'];
+        $offer_id = explode("-", $_POST['offer_id'])[0];
+        $duration = explode("-", $_POST['offer_id'])[1];
         $start_date = $_POST['start_date'];
         $payment_type = $_POST['payment_type'];
 
-        if ($offer_id) {
+        $end_date = date('d-m-Y', strtotime($start_date . $duration));
 
-            $stmt = $con->prepare("INSERT INTO clients_subscriptions (gym_id, client_id, offer_id, payment_type, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?) ");
+        $stmt = $con->prepare("INSERT INTO clients_subscriptions (gym_id, client_id, offer_id, payment_type, start_date, end_date)
 
-            $stmt->bind_param("iiisss", $gym_id, $C_ID, $offer_id, $payment_type, $start_date, $end_date);
-        } else {
+            VALUES (?, ?, ?, ?, ?, ?) ");
 
-            $stmt = $con->prepare("INSERT INTO clients_subscriptions (gym_id, client_id, payment_type, start_date, end_date) VALUES (?, ?, ?, ?, ?) ");
-
-            $stmt->bind_param("iisss", $gym_id, $C_ID, $payment_type, $start_date, $end_date);
-        }
+        $stmt->bind_param("iiisss", $gym_id, $C_ID, $offer_id, $payment_type, $start_date, $end_date);
 
         if ($stmt->execute()) {
 
@@ -153,6 +149,7 @@ $manager_name = $row3['name'];
                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><?php echo $name ?></a>
                                 <div class="dropdown-menu m-0 bg-secondary rounded-0">
                                     <a href="Account.php" class="dropdown-item">Account</a>
+                                    <a href="Cart.php" class="dropdown-item">Cart</a>
                                     <a href="Orders.php" class="dropdown-item">Orders</a>
                                     <a href="Subscriptions.php" class="dropdown-item">Subsciptions</a>
                                     <a href="Logout.php" class="dropdown-item">Logout</a>
@@ -224,7 +221,7 @@ $manager_name = $row3['name'];
                 <input type="hidden" name="C_ID" value="<?php echo $C_ID ?>">
                 <input type="hidden" name="gym_id" value="<?php echo $gym_id ?>">
 
-                <?php if($offer_id){?>
+                <?php if ($offer_id) {?>
 
                     <input type="hidden" name="offer_id" value="<?php echo $offer_id ?>">
 
@@ -247,26 +244,27 @@ $manager_name = $row3['name'];
 
 
 
-                            <?php if(!$offer_id){ ?>
+                            <?php if (!$offer_id) {?>
 
 
                             <div class="form-item">
                                 <label class="form-label my-3">Offer<sup>*</sup></label>
                                 <!-- <input type="text" class="form-control"> -->
-                                <select name="offer_id" class="form-select" id="">
+                                <select name="offer_id" class="form-select" id="" required>
 
                                 <option value="" selected default>Select Offer</option>
                                 <?php
 $sql1 = mysqli_query($con, "SELECT * from gym_offers WHERE active = 1 AND gym_id = '$gym_id' ORDER BY id DESC");
 
-while ($row1 = mysqli_fetch_array($sql1)) {
+    while ($row1 = mysqli_fetch_array($sql1)) {
 
-    $offer_id = $row1['id'];
-    $offer_name = $row1['name'];
-    $gym_id = $row1['gym_id'];
+        $offer_id = $row1['id'];
+        $offer_name = $row1['name'];
+        $duration = $row1['duration'];
+        $price = $row1['price'];
 
-    ?>
-                                <option value="<?php echo $offer_id ?>"><?php echo $offer_name ?></option>
+        ?>
+                                <option value="<?php echo $offer_id ?>-<?php echo $duration ?>"><?php echo $offer_name ?> (<?php echo $price ?> JDs)</option>
 
 
 <?php
@@ -276,7 +274,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                                 </select>
                             </div>
 
-                            <?php } ?>
+                            <?php }?>
 
 
 
@@ -284,11 +282,11 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                             <div class="form-item">
                                 <label class="form-label my-3">Payment Type<sup>*</sup></label>
                                 <!-- <input type="text" class="form-control"> -->
-                                <select name="payment_type" class="form-select" id="" required>
+                                <select onchange="paymentType(event)" name="payment_type" id="payment_type" class="form-select" required>
 
 
+                                    <option value="E-Payment">E-Payment</option>
                                 <option value="Cash">Cash</option>
-                                <option value="E-Payment">E-Payment</option>
 
 
 
@@ -300,10 +298,34 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                                 <label class="form-label my-3">Start Date <sup>*</sup></label>
                                 <input type="date" name="start_date" min="<?php echo date('Y-m-d'); ?>" class="form-control" required>
                             </div>
-                            <div class="form-item">
-                                <label class="form-label my-3">End Date <sup>*</sup></label>
-                                <input type="date" name="end_date" min="<?php echo date('Y-m-d'); ?>" class="form-control" required>
-                            </div>
+
+
+
+
+                            <div id="e-payment">
+    <div class="form-item">
+        <label class="form-label my-3">Card Number </label>
+        <input type="text" pattern="[0-9]{16}" class="form-control" >
+    </div>
+
+    <div class="form-item">
+        <label class="form-label my-3">Card Holder Name </label>
+        <input type="text"  class="form-control" >
+    </div>
+
+    <div class="form-item">
+        <label class="form-label my-3">Expiry Date </label>
+        <input type="date"  class="form-control" >
+    </div>
+
+    <div class="form-item">
+        <label class="form-label my-3">CVV </label>
+        <input type="text" pattern="[0-9]{3}" class="form-control" >
+    </div>
+
+
+    </div>
+
 
                             <div class="row g-4 text-center align-items-center justify-content-center pt-4">
                                 <button type="Submit" name="Submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Subscribe</button>
@@ -424,6 +446,30 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <script>
+
+
+
+const paymentType = (e) => {
+
+    let paymentTypeVar = document.getElementById('payment_type').value
+    console.log(paymentTypeVar);
+
+        if(paymentTypeVar == 'E-Payment'){
+
+            document.getElementById("e-payment").style.display = 'block'
+
+        } else {
+
+            document.getElementById("e-payment").style.display = 'none'
+
+
+        }
+}
+
+
+    </script>
     </body>
 
 </html>

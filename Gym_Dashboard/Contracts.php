@@ -17,38 +17,109 @@ if (!$M_ID) {
     $row1 = mysqli_fetch_array($sql1);
 
     $gym_id = $row1['id'];
-    $title = $row1['title'];
+    $name = $row1['title'];
     $email = $row1['email'];
 
     if (isset($_POST['Submit'])) {
 
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $phone = $_POST['phone'];
         $gym_id = $_POST['gym_id'];
+        $start_date = $_POST['start_date'];
+        $contract_type = $_POST['contract_type'];
 
-        $image = $_FILES["file"]["name"];
-        $image = 'Gym_Coaches/' . $image;
+        $stmt = $con->prepare("SELECT end_date FROM gyms_contracts WHERE gym_id = ?");
+        $stmt->bind_param("i", $gym_id);
+        $stmt->execute();
+        $stmt->store_result();
 
-        $stmt = $con->prepare("INSERT INTO gym_coaches (gym_id, name, email, image, phone) VALUES (?, ?, ?, ?, ?) ");
+        if ($stmt->num_rows > 0) {
 
-        $stmt->bind_param("issss", $gym_id, $name, $email, $image, $phone);
+            $stmt->bind_result($end_date);
+            $stmt->fetch();
 
-        if ($stmt->execute()) {
+            $end_date = new DateTime($end_date);
 
-            move_uploaded_file($_FILES["file"]["tmp_name"], "./Gym_Coaches/" . $_FILES["file"]["name"]);
+            $today = new DateTime();
 
-            echo "<script language='JavaScript'>
-              alert ('A New Coach Has Been Added Successfully !');
-         </script>";
+            if ($end_date < $today) {
 
-            echo "<script language='JavaScript'>
-        document.location='./Coaches.php';
+                if ($contract_type == 1) {
+
+                    $end_date = date('d-m-Y', strtotime($start_date . ' +90 days'));
+                    $contract_type = "3 Months Open Contract (First Time Only) (For Free)";
+
+                } else if ($contract_type == 2) {
+
+                    $end_date = date('d-m-Y', strtotime($start_date . ' +180 days'));
+                    $contract_type = "6 Months Contract (300 JOD)";
+
+                } else if ($contract_type == 3) {
+
+                    $end_date = date('d-m-Y', strtotime($start_date . ' +360 days'));
+                    $contract_type = "12 Months COntract (600 JOD)";
+
+                }
+
+                $stmt = $con->prepare("INSERT INTO gyms_contracts (gym_id, contract_type, start_date, end_date) VALUES (?, ?, ?, ?) ");
+
+                $stmt->bind_param("isss", $gym_id, $contract_type, $start_date, $end_date);
+
+                if ($stmt->execute()) {
+
+                    echo "<script language='JavaScript'>
+                alert ('New Contract Have Been Added !');
            </script>";
 
+                    echo "<script language='JavaScript'>
+          document.location='./Contracts.php';
+             </script>";
+
+                }
+
+            } else {
+
+                echo "<script language='JavaScript'>
+                alert ('Contract is still active. !');
+           </script>";
+            }
+
+        } else {
+
+            if ($contract_type == 1) {
+
+                $end_date = date('d-m-Y', strtotime($start_date . ' +90 days'));
+                $contract_type = "3 Months Open Contract (First Time Only) (For Free)";
+
+            } else if ($contract_type == 2) {
+
+                $end_date = date('d-m-Y', strtotime($start_date . ' +180 days'));
+                $contract_type = "6 Months Contract (300 JOD)";
+
+            } else if ($contract_type == 3) {
+
+                $end_date = date('d-m-Y', strtotime($start_date . ' +360 days'));
+                $contract_type = "12 Months COntract (600 JOD)";
+
+            }
+
+            $stmt = $con->prepare("INSERT INTO gyms_contracts (gym_id, contract_type, start_date, end_date) VALUES (?, ?, ?, ?) ");
+
+            $stmt->bind_param("isss", $gym_id, $contract_type, $start_date, $end_date);
+
+            if ($stmt->execute()) {
+
+                echo "<script language='JavaScript'>
+            alert ('New Contract Have Been Added !');
+       </script>";
+
+                echo "<script language='JavaScript'>
+      document.location='./Contracts.php';
+         </script>";
+
+            }
         }
 
     }
+
 }
 
 ?>
@@ -59,7 +130,7 @@ if (!$M_ID) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Coaches - Gym Hub</title>
+    <title>Contracts - Gym Hub</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
@@ -118,12 +189,12 @@ if (!$M_ID) {
                 alt="Profile"
                 class="rounded-circle"
               />
-              <span class="d-none d-md-block dropdown-toggle ps-2"><?php echo $title ?></span> </a
+              <span class="d-none d-md-block dropdown-toggle ps-2"><?php echo $name ?></span> </a
             >
 
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
-              <h6><?php echo $title ?></h6>
+              <h6><?php echo $name ?></h6>
             </li>
             <li>
               <hr class="dropdown-divider">
@@ -151,32 +222,35 @@ if (!$M_ID) {
 
     <main id="main" class="main">
       <div class="pagetitle">
-        <h1>Coaches</h1>
+        <h1>Contracts</h1>
         <nav>
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-            <li class="breadcrumb-item">Coaches</li>
+            <li class="breadcrumb-item">Contracts</li>
           </ol>
         </nav>
       </div>
       <!-- End Page Title -->
       <section class="section">
-        <div class="mb-3">
+      <div class="mb-3">
           <button
             type="button"
             class="btn btn-primary"
             data-bs-toggle="modal"
             data-bs-target="#verticalycentered"
           >
-            Add New Coach
+            Add New Contract
           </button>
         </div>
+
+
+
 
         <div class="modal fade" id="verticalycentered" tabindex="-1">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title">Coach Information</h5>
+                <h5 class="modal-title">Contract Information</h5>
                 <button
                   type="button"
                   class="btn-close"
@@ -186,53 +260,39 @@ if (!$M_ID) {
               </div>
               <div class="modal-body">
 
-                <form method="POST" action="./Coaches.php" enctype="multipart/form-data">
+                <form method="POST" action="./Contracts.php" enctype="multipart/form-data">
 
+                <input type="hidden" name="gym_id" value="<?php echo $gym_id ?>" class="form-control" />
 
-<input type="hidden" name="gym_id" value="<?php echo $gym_id ?>" id="">
 
                   <div class="row mb-3">
                     <label for="inputText" class="col-sm-4 col-form-label"
-                      >Name</label
+                      > Start Date</label
                     >
                     <div class="col-sm-8">
-                      <input type="text" name="name" class="form-control" />
+                      <input type="date" name="start_date" class="form-control" required/>
                     </div>
                   </div>
 
                   <div class="row mb-3">
-                    <label for="inputText" class="col-sm-4 col-form-label"
-                      >Email</label
+                    <label for="contract_type" class="col-sm-4 col-form-label"
+                      > Contract Type</label
                     >
                     <div class="col-sm-8">
-                      <input type="email" name="email" class="form-control" />
+                      <select name="contract_type" class="form-select" id="contract_type" required>
+                            <option value="1">3 Months Open Contract (First Time Only) (For Free)</option>
+                            <option value="2">6 Months Contract (300 JOD)</option>
+                            <option value="3">12 Months COntract (600 JOD)</option>
+                        </select>
+
+
                     </div>
                   </div>
-
-                  <div class="row mb-3">
-                    <label for="inputText" class="col-sm-4 col-form-label"
-                      >Phone</label
-                    >
-                    <div class="col-sm-8">
-                      <input type="text" name="phone" class="form-control" />
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label for="inputText" class="col-sm-4 col-form-label"
-                      >Image</label
-                    >
-                    <div class="col-sm-8">
-                      <input type="file" name="file" class="form-control" />
-                    </div>
-                  </div>
-
-
 
                   <div class="row mb-3">
                     <div class="text-end">
                       <button type="submit" name="Submit" class="btn btn-primary">
-                        Submit
+                        Submit Form
                       </button>
                     </div>
                   </div>
@@ -252,6 +312,8 @@ if (!$M_ID) {
           </div>
         </div>
 
+
+
         <div class="row">
           <div class="col-lg-12">
             <div class="card">
@@ -261,52 +323,50 @@ if (!$M_ID) {
                   <thead>
                     <tr>
                       <th scope="col">ID</th>
-                      <th scope="col">Image</th>
-                      <th scope="col">Coach Name</th>
-                      <th scope="col">Coach Email</th>
-                      <th scope="col">Coach Phone</th>
+                      <th scope="col">Contract Type</th>
+                      <th scope="col">Start Date</th>
+                      <th scope="col">End Date</th>
+                      <th scope="col">Days Left</th>
                       <th scope="col">Created At</th>
-                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                   <?php
-$sql1 = mysqli_query($con, "SELECT * from gym_coaches WHERE gym_id = '$gym_id' ORDER BY id DESC");
+$sql1 = mysqli_query($con, "SELECT * from gyms_contracts WHERE gym_id = '$gym_id' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 
-    $coach_id = $row1['id'];
-    $coach_name = $row1['name'];
-    $coach_image = $row1['image'];
-    $coach_email = $row1['email'];
-    $coach_phone = $row1['phone'];
-    $active = $row1['active'];
+    $contract_id = $row1['id'];
+    $contract_type = $row1['contract_type'];
+    $start_date = $row1['start_date'];
+    $end_date = $row1['end_date'];
     $created_at = $row1['created_at'];
+
+    $current_date = new DateTime();
+    $end_date_time = new DateTime($end_date);
+    $interval = $current_date->diff($end_date_time);
+    $days_left = $interval->days;
 
     ?>
                     <tr>
-                      <th scope="row"><?php echo $coach_id ?></th>
-                      <th scope="row"><img src="<?php echo $coach_image ?>" alt="" width="150px" height="150px"></th>
-                      <td><?php echo $coach_name ?></td>
-                      <td><?php echo $coach_email ?></td>
-                      <td><?php echo $coach_phone ?></td>
-                      <th scope="row"><?php echo $created_at ?></th>
-                      <td>
-                        <a href="./Edit-Coach.php?coach_id=<?php echo $coach_id ?>" class="btn btn-success"
-                          >Edit</a
-                        >
+                      <th scope="row"><?php echo $contract_id ?></th>
+                      <th scope="row"><?php echo $contract_type ?></th>
+                      <td><?php echo $start_date ?></td>
+                      <td><?php echo $end_date ?></td>
+                      <td><?php
 
-                        <?php if ($active == 1) {?>
+    if ($end_date_time < $current_date) {
 
-<a href="./DeleteOrRestoreCoach.php?coach_id=<?php echo $coach_id ?>&&isActive=<?php echo 0 ?>" class="btn btn-danger">Delete</a>
+        echo "Days Passed";
 
-<?php } else {?>
+    } else {
 
-  <a href="./DeleteOrRestoreCoach.php?coach_id=<?php echo $coach_id ?>&&isActive=<?php echo 1 ?>" class="btn btn-primary">Restore</a>
+        echo "$days_left Days";
+    }
 
-<?php }?>
+    ?></td>
+                      <td><?php echo $created_at ?></td>
 
-                      </td>
                     </tr>
 <?php
 }?>
@@ -338,7 +398,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
     <script>
     window.addEventListener('DOMContentLoaded', (event) => {
-     document.querySelector('#sidebar-nav .nav-item:nth-child(4) .nav-link').classList.remove('collapsed')
+     document.querySelector('#sidebar-nav .nav-item:nth-child(7) .nav-link').classList.remove('collapsed')
    });
 </script>
 

@@ -17,9 +17,11 @@ if (!$A_ID) {
     $row1 = mysqli_fetch_array($sql1);
 
     $name = $row1['name'];
-}
-?>
+    $email = $row1['email'];
 
+}
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +29,7 @@ if (!$A_ID) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Orders - GymHub</title>
+    <title>Rejected Gyms - Gym Hub</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
@@ -86,8 +88,25 @@ if (!$A_ID) {
                 alt="Profile"
                 class="rounded-circle"
               />
-              <span class="d-none d-md-block ps-2"><?php echo $name ?></span> </a
-            ><!-- End Profile Iamge Icon -->
+              <span class="d-none d-md-block dropdown-toggle ps-2"><?php echo $name ?></span> </a
+            >
+
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+            <li class="dropdown-header">
+              <h6><?php echo $name ?></h6>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="./Logout.php">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Sign Out</span>
+              </a>
+            </li>
+
+          </ul>
           </li>
           <!-- End Profile Nav -->
         </ul>
@@ -102,18 +121,16 @@ if (!$A_ID) {
 
     <main id="main" class="main">
       <div class="pagetitle">
-        <h1>Orders</h1>
+        <h1>Gyms</h1>
         <nav>
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-            <li class="breadcrumb-item">Orders</li>
+            <li class="breadcrumb-item">Gyms</li>
           </ol>
         </nav>
       </div>
       <!-- End Page Title -->
       <section class="section">
-
-
 
 
 
@@ -126,50 +143,49 @@ if (!$A_ID) {
                   <thead>
                     <tr>
                       <th scope="col">ID</th>
-                      <th scope="col">Client Name</th>
-                      <th scope="col">Item Name</th>
-                      <th scope="col">Item Price</th>
-                      <th scope="col">QTY</th>
-                      <th scope="col">Total Price</th>
+                      <th scope="col">Image</th>
+                      <th scope="col">Manager Name</th>
+                      <th scope="col">Title</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Phone</th>
+                      <th scope="col">City</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Created At</th>
                     </tr>
                   </thead>
                   <tbody>
-<?php
-$sql1 = mysqli_query($con, "SELECT * from orders ORDER BY id DESC");
+                  <?php
+$sql1 = mysqli_query($con, "SELECT * from gyms WHERE status = 'Rejected' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 
-    $order_id = $row1['id'];
-    $client_id = $row1['client_id'];
-    
-    $sql2 = mysqli_query($con, "SELECT * from users WHERE id = '$client_id'");
+    $gym_id = $row1['id'];
+    $manager_id = $row1['manager_id'];
+    $gym_image = $row1['image'];
+    $gym_name = $row1['title'];
+    $gym_email = $row1['email'];
+    $gym_phone = $row1['phone'];
+    $gym_city = $row1['city'];
+    $status = $row1['status'];
+    $active = $row1['active'];
+    $created_at = $row1['created_at'];
+
+    $sql2 = mysqli_query($con, "SELECT * from users WHERE id = '$manager_id'");
     $row2 = mysqli_fetch_array($sql2);
 
-    $client_name = $row2['name'];
-
-    $sql3 = mysqli_query($con, "SELECT * from order_items WHERE order_id = '$order_id'");
-    $row3 = mysqli_fetch_array($sql3);
-
-    $product_id = $row3['product_id'];
-    $total_price = $row3['total_price'];
-    $qty = $row3['qty'];
-
-    $sql4 = mysqli_query($con, "SELECT * from store_items WHERE id = '$product_id'");
-    $row4 = mysqli_fetch_array($sql4);
-
-    $item_name = $row4['title'];
-    $price = $row4['price'];
+    $manager_name = $row2['name'];
 
     ?>
                     <tr>
-                      <th scope="row"><?php echo $order_id ?></th>
-                      <td><?php echo $client_name ?></td>
-                      <td><?php echo $item_name ?></td>
-                      <td><?php echo $price ?></td>
-                      <td><?php echo $qty ?></td>
-                      <td><?php echo $total_price ?> JDs</td>
-
-
+                      <th scope="row"><?php echo $gym_id ?></th>
+                      <th scope="row"><img src="../Gym_Dashboard/<?php echo $gym_image ?>" alt="" width="150px" height="150px"></th>
+                      <th scope="row"><?php echo $manager_name ?></th>
+                      <td><?php echo $gym_name ?></td>
+                      <td><?php echo $gym_email ?></td>
+                      <td><?php echo $gym_phone ?></td>
+                      <td><?php echo $gym_city ?></td>
+                      <td><?php echo $status ?></td>
+                      <th scope="row"><?php echo $created_at ?></th>
 
                     </tr>
 <?php
@@ -202,7 +218,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
     <script>
     window.addEventListener('DOMContentLoaded', (event) => {
-     document.querySelector('#sidebar-nav .nav-item:nth-child(5) .nav-link').classList.remove('collapsed')
+     document.querySelector('#sidebar-nav .nav-item:nth-child(3) .nav-link').classList.remove('collapsed')
    });
 </script>
 
@@ -218,6 +234,5 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
     <!-- Template Main JS File -->
     <script src="../assets/js/main.js"></script>
-
   </body>
 </html>

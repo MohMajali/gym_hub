@@ -3,6 +3,8 @@ session_start();
 
 include "./Connect.php";
 
+$manager_id = $_GET['manager_id'];
+
 if (isset($_POST['Submit'])) {
 
     $manager_id = $_POST['manager_id'];
@@ -15,25 +17,73 @@ if (isset($_POST['Submit'])) {
     $image = $_FILES["file"]["name"];
     $image = 'Gyms_Images/' . $image;
 
+    $start_date = $_POST['start_date'];
+    $contract_type = $_POST['contract_type'];
 
-    
+    if ($contract_type == 1) {
 
-    $stmt = $con->prepare("INSERT INTO gyms (manager_id, title, email, phone, password, city, image) VALUES (?, ?, ?, ?, ?, ?, ?) ");
+        $end_date = date('d-m-Y', strtotime($start_date . ' +90 days'));
+        $contract_type = "3 Months Open Contract (First Time Only) (For Free)";
 
-    $stmt->bind_param("sssssss", $manager_id, $title, $email, $phone, $password, $city, $image);
+    } else if ($contract_type == 2) {
 
-    if ($stmt->execute()) {
+        $end_date = date('d-m-Y', strtotime($start_date . ' +180 days'));
+        $contract_type = "6 Months Contract (300 JOD)";
 
-        move_uploaded_file($_FILES["file"]["tmp_name"], "./Gym_Dashboard/Gyms_Images/" . $_FILES["file"]["name"]);
+    } else if ($contract_type == 3) {
+
+        $end_date = date('d-m-Y', strtotime($start_date . ' +360 days'));
+        $contract_type = "12 Months COntract (600 JOD)";
+
+    }
+
+    $query = mysqli_query($con, "SELECT * FROM gyms WHERE email ='$email' AND password = '$Password'");
+
+    if (mysqli_num_rows($query) > 0) {
 
         echo "<script language='JavaScript'>
-          alert ('Gym Register Successfully !');
-     </script>";
+      alert ('Gym With This Email Already Exist !');
+ </script>";
 
-        echo "<script language='JavaScript'>
-    document.location='./Gym_Login.php';
-       </script>";
+    } else {
 
+        $stmt = $con->prepare("INSERT INTO gyms (manager_id, title, email, phone, password, city, image) VALUES (?, ?, ?, ?, ?, ?, ?) ");
+
+        $stmt->bind_param("sssssss", $manager_id, $title, $email, $phone, $password, $city, $image);
+
+        if ($stmt->execute()) {
+
+            $stmt = $con->prepare("SELECT id FROM gyms WHERE email = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->store_result();
+
+            if ($stmt->num_rows > 0) {
+
+                $stmt->bind_result($id);
+                $stmt->fetch();
+
+                $stmt = $con->prepare("INSERT INTO gyms_contracts (gym_id, contract_type, start_date, end_date) VALUES (?, ?, ?, ?) ");
+
+                $stmt->bind_param("isss", $id, $contract_type, $start_date, $end_date);
+
+                if ($stmt->execute()) {
+
+                    move_uploaded_file($_FILES["file"]["tmp_name"], "./Gym_Dashboard/Gyms_Images/" . $_FILES["file"]["name"]);
+
+                    echo "<script language='JavaScript'>
+                alert ('Gym Register Successfully !');
+           </script>";
+
+                    echo "<script language='JavaScript'>
+          document.location='./Manager_Login.php';
+             </script>";
+
+                }
+
+            }
+
+        }
     }
 
 }
@@ -45,13 +95,13 @@ if (isset($_POST['Submit'])) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Register Page</title>
+    <title>Gym Register Page</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
     <!-- Favicons -->
-    <link href="assets/img/logo.jpeg" rel="icon" />
-    <link href="assets/img/logo.jpeg" rel="apple-touch-icon" />
+    <link href="assets/img/Logo.jpg" rel="icon" />
+    <link href="assets/img/Logo.jpg" rel="apple-touch-icon" />
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -95,7 +145,7 @@ if (isset($_POST['Submit'])) {
                     href="index.php"
                     class="logo d-flex align-items-center w-auto"
                   >
-                    <img src="assets/img/logo.jpeg" alt="" width="50px"/>
+                    <img src="assets/img/Logo.jpg" alt="" width="50px"/>
                     <span class="d-none d-lg-block text-uppercase"
                       >GymHub</span
                     >
@@ -115,7 +165,12 @@ if (isset($_POST['Submit'])) {
                     </div>
 
                     <form class="row g-3 needs-validation" method="POST" action="./Gym_Register.php" enctype="multipart/form-data" id="login-form">
-                      <div class="col-12">
+
+                    <input type="hidden" name="manager_id" value="<?php echo $manager_id ?>">
+
+
+
+                      <div class="col-6">
                         <label for="name" class="form-label">Title</label>
                         <div class="input-group has-validation">
 
@@ -130,7 +185,7 @@ if (isset($_POST['Submit'])) {
                         </div>
                       </div>
 
-                      <div class="col-12">
+                      <div class="col-6">
                         <label for="name" class="form-label">Email</label>
                         <div class="input-group has-validation">
 
@@ -146,7 +201,7 @@ if (isset($_POST['Submit'])) {
                       </div>
 
 
-                      <div class="col-12">
+                      <div class="col-6">
                         <label for="name" class="form-label">Phone</label>
                         <div class="input-group has-validation">
 
@@ -164,7 +219,7 @@ if (isset($_POST['Submit'])) {
 
 
 
-                      <div class="col-12">
+                      <div class="col-6">
                         <label for="yourPassword" class="form-label"
                           >Password</label
                         >
@@ -183,6 +238,38 @@ if (isset($_POST['Submit'])) {
 
 
                       <div class="col-12">
+                        <label for="startDate" class="form-label"
+                          >Contract Start Date</label
+                        >
+                        <input
+                          type="date"
+                          name="start_date"
+                          min="<?php echo date('Y-m-d') ?>"
+                          class="form-control"
+                          id="startDate"
+                          required
+                        />
+
+                      </div>
+
+
+
+
+
+                      <div class="col-12">
+                      <label for="contract_type" class="form-label"
+                          >Select Contract Type</label
+                        >
+                        <select name="contract_type" class="form-select" id="contract_type" required>
+                            <option value="1">3 Months Open Contract (First Time Only) (For Free)</option>
+                            <option value="2">6 Months Contract (300 JOD)</option>
+                            <option value="3">12 Months COntract (600 JOD)</option>
+                        </select>
+                      </div>
+
+
+
+                      <div class="col-12">
                       <label for="locationId" class="form-label"
                           >Select City</label
                         >
@@ -194,27 +281,7 @@ if (isset($_POST['Submit'])) {
                         </select>
                       </div>
 
-                      <div class="col-12">
-                      <label for="managerId" class="form-label"
-                          >Gym Manager</label
-                        >
-                        <select name="manager_id" class="form-select" id="managerId" required>
 
-                        <?php $sql1 = mysqli_query($con, "SELECT * from users WHERE type = 'Manager' ORDER BY id DESC");
-
-while ($row1 = mysqli_fetch_array($sql1)) {
-
-    $manager_id = $row1['id'];
-    $manager_name = $row1['name'];
-
-    ?>
-
-                        <option value="<?php echo $manager_id ?>"><?php echo $manager_name ?></option>
-<?php
-}?>
-
-                        </select>
-                      </div>
 
 
                       <div class="col-12">
@@ -242,7 +309,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                       <div class="col-12">
                         <p class="small mb-0">
                           Already Have Account
-                          <a href="./Gym_Login.php">Create an account</a>
+                          <a href="./Manager_Login.php">Login Now</a>
                         </p>
                       </div>
                     </form>

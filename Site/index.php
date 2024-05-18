@@ -51,6 +51,14 @@ if ($C_ID) {
         <link href="css/bootstrap.min.css" rel="stylesheet">
 
         <!-- Template Stylesheet -->
+
+
+
+
+        <link
+      href="../assets/vendor/bootstrap-icons/bootstrap-icons.css"
+      rel="stylesheet"
+    />
         <link href="css/style.css" rel="stylesheet">
     </head>
 
@@ -100,6 +108,7 @@ if ($C_ID) {
                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><?php echo $name ?></a>
                                 <div class="dropdown-menu m-0 bg-secondary rounded-0">
                                     <a href="Account.php" class="dropdown-item">Account</a>
+                                    <a href="Cart.php" class="dropdown-item">Cart</a>
                                     <a href="Orders.php" class="dropdown-item">Orders</a>
                                     <a href="Subscriptions.php" class="dropdown-item">Subsciptions</a>
                                     <a href="Logout.php" class="dropdown-item">Logout</a>
@@ -220,17 +229,56 @@ while ($row1 = mysqli_fetch_array($sql1)) {
 
     $category_name = $row2['name'];
 
+    if ($C_ID) {
+
+        $sql2 = mysqli_query($con, "SELECT * from customer_favorities WHERE customer_id = '$C_ID' AND product_id = '$item_id'");
+        $row2 = mysqli_fetch_array($sql2);
+
+        $favorite_id = $row2['id'];
+
+    }
+
     ?>
 
 
-                                        <a href="./Item.php?item_id=<?php echo $item_id?>" class="col-md-6 col-lg-4 col-xl-3">
+                                        <div class="col-md-6 col-lg-4 col-xl-3">
                                             <div class="rounded position-relative fruite-item">
-                                                <div class="fruite-img">
+                                                <a href="./Item.php?item_id=<?php echo $item_id ?>" class="fruite-img">
                                                     <img src="../Admin_Dashboard/<?php echo $item_image ?>" class="img-fluid w-100 rounded-top" alt="">
-                                                </div>
+                                                </a>
                                                 <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><?php echo $category_name ?></div>
+
+
+                                                <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">
+
+<a href="<?php
+
+    if ($favorite_id) {
+        echo "AddOrRemoveFavorite.php?favorite_id=" . $favorite_id;
+    } else {
+
+        echo "AddOrRemoveFavorite.php?customer_id=" . $C_ID . '&product_id=' . $item_id;
+    }
+
+    ?>">
+
+
+<i class="bi bi-balloon-heart-fill" style="<?php
+
+    if ($favorite_id) {
+
+        echo "color: red;";
+    } else {
+        echo "color: white;";
+    }
+
+    ?>"></i>
+</a>
+
+
+                </div>
                                                 <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                    <h4><?php echo $title ?></h4>
+                                                    <a href="./Item.php?item_id=<?php echo $item_id ?>"><h4><?php echo $title ?></h4></a>
                                                     <p><?php echo $description ?></p>
 
 
@@ -242,7 +290,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                                                     </div>
                                                 </div>
                                             </div>
-</a>
+</div>
 
                                         <?php
 }?>
@@ -298,7 +346,7 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                         <div class="vesitable-img">
                             <img src="../Gym_Dashboard/<?php echo $gym_image ?>" class="img-fluid w-100 rounded-top" alt="">
                         </div>
-                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;"><?php echo $manager_name ?></div>
+                        <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><?php echo $manager_name ?></div>
                         <div class="p-4 rounded-bottom">
                             <h4><?php echo $gym_name ?></h4>
                             <p><?php echo $gym_city ?></p>

@@ -12,20 +12,33 @@ if (isset($_POST['Submit'])) {
     $phone = $_POST['phone'];
     $email = $_POST['email'];
     $type = 'Manager';
+    $active = 0;
 
-    $stmt = $con->prepare("INSERT INTO users (type, name, email, password, phone, location, gender) VALUES (?, ?, ?, ?, ?, ?, ?) ");
+    $stmt = $con->prepare("INSERT INTO users (type, name, email, password, phone, location, gender, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ");
 
-    $stmt->bind_param("sssssss", $type, $name, $email, $password, $phone, $city, $gender);
+    $stmt->bind_param("sssssssi", $type, $name, $email, $password, $phone, $city, $gender, $active);
 
     if ($stmt->execute()) {
 
-        echo "<script language='JavaScript'>
-          alert ('Register Successfully, You Can Login Now !');
-     </script>";
+        $stmt = $con->prepare("SELECT id FROM users WHERE email = ? AND password = ?");
+        $stmt->bind_param("ss", $email, $password);
+        $stmt->execute();
+        $stmt->store_result();
 
-        echo "<script language='JavaScript'>
-    document.location='./Gym_Register.php';
+        if ($stmt->num_rows > 0) {
+
+            $stmt->bind_result($id);
+            $stmt->fetch();
+
+            echo "<script language='JavaScript'>
+        alert ('Register Successfully, Please Wait Admin Approval !');
+   </script>";
+
+            echo "<script language='JavaScript'>
+    document.location='./Gym_Register.php?manager_id={$id}';
        </script>";
+
+        }
 
     }
 
@@ -38,13 +51,13 @@ if (isset($_POST['Submit'])) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Register Page</title>
+    <title>Manager Register Page</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
     <!-- Favicons -->
-    <link href="assets/img/logo.jpeg" rel="icon" />
-    <link href="assets/img/logo.jpeg" rel="apple-touch-icon" />
+    <link href="assets/img/Logo.jpg" rel="icon" />
+    <link href="assets/img/Logo.jpg" rel="apple-touch-icon" />
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -88,7 +101,7 @@ if (isset($_POST['Submit'])) {
                     href="index.php"
                     class="logo d-flex align-items-center w-auto"
                   >
-                    <img src="assets/img/logo.jpeg" alt="" width="50px"/>
+                    <img src="assets/img/Logo.jpg" alt="" width="50px"/>
                     <span class="d-none d-lg-block text-uppercase"
                       >GymHub</span
                     >
@@ -180,8 +193,8 @@ if (isset($_POST['Submit'])) {
                           >Select Location</label
                         >
                         <select name="city" class="form-select" id="locationId" required>
-                            <option value="location 1">location 1</option>
-                            <option value="location 2">location 2</option>
+                            <option value="Khdala">Khdala</option>
+                            <option value="Jubyaha">Jubyaha</option>
                             <option value="location 3">location 3</option>
                             <option value="location 3">location 3</option>
                         </select>
@@ -208,7 +221,7 @@ if (isset($_POST['Submit'])) {
                       <div class="col-12">
                         <p class="small mb-0">
                           Already Have Account
-                          <a href="./Gym_Login.php">Create an account</a>
+                          <a href="./Manager_Login.php">Create an account</a>
                         </p>
                       </div>
                     </form>

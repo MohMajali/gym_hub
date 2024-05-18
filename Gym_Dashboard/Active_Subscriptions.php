@@ -3,19 +3,20 @@ session_start();
 
 include "../Connect.php";
 
-$G_ID = $_SESSION['G_Log'];
+$M_ID = $_SESSION['M_Log'];
 
-if (!$G_ID) {
+if (!$M_ID) {
 
     echo '<script language="JavaScript">
-     document.location="../Gym_Login.php";
+     document.location="../Manager_Login.php";
     </script>';
 
 } else {
 
-    $sql1 = mysqli_query($con, "select * from gyms where id='$G_ID'");
+    $sql1 = mysqli_query($con, "select * from gyms where manager_id='$M_ID'");
     $row1 = mysqli_fetch_array($sql1);
 
+    $gym_id = $row1['id'];
     $name = $row1['title'];
     $email = $row1['email'];
 
@@ -29,7 +30,7 @@ if (!$G_ID) {
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Customers Subscriptions - Gym Hub</title>
+    <title>Active Subscriptions - Gym Hub</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
@@ -121,11 +122,11 @@ if (!$G_ID) {
 
     <main id="main" class="main">
       <div class="pagetitle">
-        <h1>Customers Subscriptions</h1>
+        <h1>Active Subscriptions</h1>
         <nav>
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-            <li class="breadcrumb-item">Customers Subscriptions</li>
+            <li class="breadcrumb-item">Active Subscriptions</li>
           </ol>
         </nav>
       </div>
@@ -150,11 +151,12 @@ if (!$G_ID) {
                       <th scope="col">Payment Type</th>
                       <th scope="col">Start - End Date</th>
                       <th scope="col">Created At</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                   <?php
-$sql1 = mysqli_query($con, "SELECT * from clients_subscriptions WHERE gym_id = '$G_ID' ORDER BY id DESC");
+$sql1 = mysqli_query($con, "SELECT * from clients_subscriptions WHERE gym_id = '$gym_id' AND status = 'Subscribed' ORDER BY id DESC");
 
 while ($row1 = mysqli_fetch_array($sql1)) {
 
@@ -186,6 +188,10 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                       <td><?php echo $payment_type ?></td>
                       <td><?php echo $start_date ?> - <?php echo $end_date ?></td>
                       <th scope="row"><?php echo $created_at ?></th>
+                      <th scope="row">
+
+                      <a href="./ManageClientSubscriptions.php?subcription_id=<?php echo $subcription_id ?>&status=DeActivated&page=active" class="btn btn-danger">De-Activate</a>
+                      </th>
 
                     </tr>
 <?php
