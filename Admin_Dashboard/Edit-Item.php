@@ -31,6 +31,7 @@ if (!$A_ID) {
     if (isset($_POST['Submit'])) {
 
         $item_id = $_POST['item_id'];
+        $category_id = $_POST['category_id'];
         $title = $_POST['title'];
         $description = $_POST['description'];
         $quantity = $_POST['quantity'];
@@ -40,9 +41,9 @@ if (!$A_ID) {
 
             $image = 'Store_Items_Images/' . $image;
 
-            $stmt = $con->prepare("UPDATE store_items SET title = ?, description = ?, quantity = ?, image = ? WHERE id = ? ");
+            $stmt = $con->prepare("UPDATE store_items SET title = ?, description = ?, quantity = ?, image = ?, category_id = ? WHERE id = ? ");
 
-            $stmt->bind_param("ssssi", $title, $description, $quantity, $image, $item_id);
+            $stmt->bind_param("sssssi", $title, $description, $quantity, $image, $category_id, $item_id);
 
             if ($stmt->execute()) {
 
@@ -59,9 +60,9 @@ if (!$A_ID) {
             }
         } else {
 
-            $stmt = $con->prepare("UPDATE store_items SET title = ?, description = ?, quantity = ? WHERE id = ? ");
+            $stmt = $con->prepare("UPDATE store_items SET title = ?, description = ?, quantity = ?, category_id = ? WHERE id = ? ");
 
-            $stmt->bind_param("sssi", $title, $description, $quantity, $item_id);
+            $stmt->bind_param("ssssi", $title, $description, $quantity, $category_id, $item_id);
 
             if ($stmt->execute()) {
 

@@ -270,7 +270,7 @@ if (!$M_ID) {
                       > Start Date</label
                     >
                     <div class="col-sm-8">
-                      <input type="date" name="start_date" class="form-control" required/>
+                      <input type="date" name="start_date" min="<?php echo date('Y-m-d') ?>" class="form-control" required/>
                     </div>
                   </div>
 

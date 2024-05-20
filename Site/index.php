@@ -248,35 +248,36 @@ while ($row1 = mysqli_fetch_array($sql1)) {
                                                 </a>
                                                 <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;"><?php echo $category_name ?></div>
 
-
+<?php if ($C_ID) {?>
                                                 <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">
 
 <a href="<?php
 
-    if ($favorite_id) {
-        echo "AddOrRemoveFavorite.php?favorite_id=" . $favorite_id;
-    } else {
+        if ($favorite_id) {
+            echo "AddOrRemoveFavorite.php?favorite_id=" . $favorite_id;
+        } else {
 
-        echo "AddOrRemoveFavorite.php?customer_id=" . $C_ID . '&product_id=' . $item_id;
-    }
+            echo "AddOrRemoveFavorite.php?customer_id=" . $C_ID . '&product_id=' . $item_id;
+        }
 
-    ?>">
+        ?>">
 
 
 <i class="bi bi-balloon-heart-fill" style="<?php
 
-    if ($favorite_id) {
+        if ($favorite_id) {
 
-        echo "color: red;";
-    } else {
-        echo "color: white;";
-    }
+            echo "color: red;";
+        } else {
+            echo "color: white;";
+        }
 
-    ?>"></i>
+        ?>"></i>
 </a>
 
 
                 </div>
+                <?php }?>
                                                 <div class="p-4 border border-secondary border-top-0 rounded-bottom">
                                                     <a href="./Item.php?item_id=<?php echo $item_id ?>"><h4><?php echo $title ?></h4></a>
                                                     <p><?php echo $description ?></p>
